@@ -128,6 +128,57 @@ pub mod gui {
             });
         }
     }
+
+    pub struct TextField<'a> {
+        area: Area,
+        color: [f32;4],
+        glyph: GlyphCache<'a>,
+        text: String
+    }
+
+    impl<'a> TextField<'a> {
+        pub fn new(area: Area) -> TextField<'a> {
+            TextField {
+                area,
+                color: [0.1, 0.1, 0.1, 1.0],
+                glyph: GlyphCache::new(
+                    "C:/windows/fonts/calibri.ttf",
+                    (),
+                    TextureSettings::new()
+                ).expect("Unable to load font"),
+                text: "0".to_string()
+            }
+        }
+
+        pub fn draw(&mut self, gl: &mut GlGraphics, args: &RenderArgs) {
+            gl.draw(args.viewport(), |c, gl| {
+                graphics::rectangle(
+                    self.color,
+                    [
+                        self.area.x() as f64,
+                        self.area.y() as f64,
+                        self.area.w() as f64,
+                        self.area.h() as f64
+                    ],
+                    c.transform,
+                    gl
+                );
+                let size: u32 = (self.area.h() as u32) / 3;
+                let width = self.glyph.width(size, &self.text).unwrap();
+                Text::new_color([1.0, 1.0, 1.0, 1.0], size)
+                    .draw(
+                        &self.text,
+                        &mut self.glyph,
+                        &DrawState::default(),
+                        c.transform.trans(
+                            self.area.x() as f64 + (self.area.w() as f64 - width) / 2.0,
+                            self.area.y() as f64 + size as f64 + (self.area.h() as f64 - size as f64) / 2.0
+                        ),
+                        gl
+                    ).unwrap();
+            });
+        }
+    }
 }
 
 fn main() {
@@ -170,11 +221,20 @@ fn main() {
         }
     };
 
+    let mut text_field = gui::TextField::new(
+        gui::Area::xywh(
+            MARGIN,
+            MARGIN,
+            MARGIN * (VARS_IN_ROW - 1) + BUTTON_SIZE * VARS_IN_ROW,
+            BUTTON_SIZE
+        )
+    );
     let mut gl = GlGraphics::new(opengl);
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
         if let Some(r) = e.render_args() {
             graphics::clear([0.0, 0.0, 0.0, 1.0], &mut gl);
+            text_field.draw(&mut gl, &r);
             for i in 0..buttons.len() {
                 buttons[i].draw(&mut gl, &r);
             };
