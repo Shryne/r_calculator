@@ -35,26 +35,26 @@ fn main() {
         .build()
         .unwrap();
 
-    let mut buttons: Vec<gui::shape::Button> = Vec::new();
+    let mut buttons = Vec::new();
 
     for y in 0..rows {
         for x in 0..VARS_IN_ROW {
             buttons.push(
                 gui::shape::Button::new(
-                    texts[(y * VARS_IN_ROW + x) as usize].to_string(),
-                    Area::xywh(
-                        MARGIN * (x + 1) + BUTTON_SIZE * x,
-                        MARGIN * (y + 2) + BUTTON_SIZE * (y + 1),
-                        BUTTON_SIZE,
-                        BUTTON_SIZE
-                    )
+                    texts[(y * VARS_IN_ROW + x) as usize],
+                        (
+                            MARGIN * (x + 1) + BUTTON_SIZE * x,
+                            MARGIN * (y + 2) + BUTTON_SIZE * (y + 1),
+                            BUTTON_SIZE,
+                            BUTTON_SIZE
+                        )
                 )
             );
         }
     };
 
     let mut text_field = gui::shape::TextField::new(
-        Area::xywh(
+        (
             MARGIN,
             MARGIN,
             MARGIN * (VARS_IN_ROW - 1) + BUTTON_SIZE * VARS_IN_ROW,
@@ -64,7 +64,7 @@ fn main() {
     let mut gl = GlGraphics::new(opengl);
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
-        if let Some(r) = e.render_args() {
+        if let Some(r) = e.render_args( ) {
             graphics::clear([0.0, 0.0, 0.0, 1.0], &mut gl);
             text_field.draw(&mut gl, &r);
             for i in 0..buttons.len() {

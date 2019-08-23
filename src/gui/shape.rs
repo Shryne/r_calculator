@@ -20,16 +20,18 @@ pub struct Button<'a> {
 }
 
 impl<'a> Button<'a> {
-    pub fn new(text: String, area: Area) -> Button<'a> {
+    pub fn new<S, A>(text: S, area: A) -> Button<'a>
+        where S: ToString,
+              A: Into<Area> {
         Button {
-            area,
+            area: area.into(),
             color: [0.1, 0.1, 0.1, 1.0],
             glyph: GlyphCache::new(
                 "C:/windows/fonts/calibri.ttf",
                 (),
                 TextureSettings::new()
             ).expect("Unable to load font"),
-            text
+            text: text.to_string()
         }
     }
 }
@@ -73,9 +75,9 @@ pub struct TextField<'a> {
 }
 
 impl<'a> TextField<'a> {
-    pub fn new(area: Area) -> TextField<'a> {
+    pub fn new(area: impl Into<Area>) -> TextField<'a> {
         TextField {
-            area,
+            area: area.into(),
             color: [0.1, 0.1, 0.1, 1.0],
             glyph: GlyphCache::new(
                 "C:/windows/fonts/calibri.ttf",
