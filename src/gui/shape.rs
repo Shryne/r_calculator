@@ -85,8 +85,10 @@ impl<'a> TextField<'a> {
             text: "0".to_string()
         }
     }
+}
 
-    pub fn draw(&mut self, gl: &mut GlGraphics, args: &RenderArgs) {
+impl<'a> Shape for TextField<'a> {
+    fn draw(&mut self, gl: &mut GlGraphics, args: &RenderArgs) {
         gl.draw(args.viewport(), |c, gl| {
             graphics::rectangle(
                 self.color,
