@@ -63,12 +63,35 @@ fn main() {
     );
     let mut gl = GlGraphics::new(opengl);
     let mut events = Events::new(EventSettings::new());
+    let mut x = 0;
+    let mut y = 0;
     while let Some(e) = events.next(&mut window) {
         if let Some(r) = e.render_args( ) {
             graphics::clear([0.0, 0.0, 0.0, 1.0], &mut gl);
             text_field.draw(&mut gl, &r);
             for i in 0..buttons.len() {
                 buttons[i].draw(&mut gl, &r);
+            };
+        }
+
+        e.mouse_cursor(|pos| {
+            x = pos[0] as i32;
+            y = pos[1] as i32
+        });
+        if let Some(b) = e.press_args() {
+            text_field.on_event((&b, x, y), true);
+            for i in 0..buttons.len() {
+                buttons[i].on_event((&b, x, y), true);
+            };
+        }
+
+        if let Some(b) = e.release_args() {
+            text_field.on_event((&b, x, y), false);
+            for i in 0..buttons.len() {
+                buttons[i].on_event(
+                    (&b, x, y),
+                    false
+                );
             };
         }
     }

@@ -3,6 +3,8 @@ use piston::input::RenderArgs;
 use graphics::text::Text;
 use graphics::{DrawState, Transformed};
 use graphics::character::CharacterCache;
+use piston::input;
+use input::Key;
 
 use super::unit::*;
 
@@ -10,13 +12,16 @@ use super::unit::*;
 pub trait Shape {
     /// Draws the element
     fn draw(&mut self, gl: &mut GlGraphics, args: &RenderArgs);
+
+    fn on_event(&mut self, event: (&input::Button, i32, i32), is_press: bool);
 }
 
 pub struct Button<'a> {
     area: Area,
     color: [f32;4],
     glyph: GlyphCache<'a>,
-    text: String
+    text: String,
+    pressed: bool
 }
 
 impl<'a> Button<'a> {
@@ -31,7 +36,8 @@ impl<'a> Button<'a> {
                 (),
                 TextureSettings::new()
             ).expect("Unable to load font"),
-            text: text.to_string()
+            text: text.to_string(),
+            pressed: false
         }
     }
 }
@@ -39,8 +45,14 @@ impl<'a> Button<'a> {
 impl<'a> Shape for Button<'a> {
     fn draw(&mut self, gl: &mut GlGraphics, args: &RenderArgs) {
         gl.draw(args.viewport(), |c, gl| {
+            let draw_color;
+            if self.pressed {
+                draw_color = [0.2, 0.2, 0.2, 1.0]
+            } else {
+                draw_color = self.color
+            }
             graphics::rectangle(
-                self.color,
+                draw_color,
                 [
                     self.area.x() as f64,
                     self.area.y() as f64,
@@ -64,6 +76,24 @@ impl<'a> Shape for Button<'a> {
                     gl
                 ).unwrap();
         });
+    }
+
+    fn on_event(&mut self, event: (&input::Button, i32, i32), is_press: bool) {
+        let (button, x, y) = event;
+        if let input::Button::Mouse(key) = *button {
+            match key {
+                input::MouseButton::Left => {
+                    if self.area.x() <= x
+                        && x <= self.area.x() + self.area.w()
+                        && self.area.y() <= y
+                        && y <= self.area.y() + self.area.h() {
+
+                        self.pressed = is_press;
+                    }
+                },
+                _ => {}
+            }
+        }
     }
 }
 
@@ -126,5 +156,9 @@ impl<'a> Shape for TextField<'a> {
                 gl
             )
         });
+    }
+
+    fn on_event(&mut self, event: (&input::Button, i32, i32), is_press: bool) {
+
     }
 }
